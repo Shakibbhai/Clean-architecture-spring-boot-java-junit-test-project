@@ -29,6 +29,15 @@ public class UserService {
         user.assignRole(role);
         userRepository.save(user);
     }
+    public void removeRole(UUID userId, UUID roleId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Role role = roleRepository.findById(roleId)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+        user.removeRole(role);
+        userRepository.save(user);
+    }
+
 
     public User getUser(UUID id) {
         return userRepository.findById(id)

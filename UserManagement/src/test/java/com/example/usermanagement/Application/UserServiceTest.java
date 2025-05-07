@@ -26,17 +26,24 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
+
         userRepository = mock(UserRepository.class);
         roleRepository = mock(RoleRepository.class);
+
+
         userService = new UserService(userRepository, roleRepository);
+
 
         userId = UUID.randomUUID();
         roleId = UUID.randomUUID();
+
+
         testUser = new User(userId, "John Doe", "john@example.com");
         testRole = new Role(roleId, "ADMIN");
 
-        // Default successful mocks
-        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
+
+        when(userRepository.findById(userId)).thenAnswer(invocation -> Optional.of(new User(
+                testUser.getId(), testUser.getName(), testUser.getEmail()))); // Return fresh copy
         when(roleRepository.findById(roleId)).thenReturn(Optional.of(testRole));
     }
 
@@ -58,7 +65,20 @@ class UserServiceTest {
     void testAssignRole() {
         userService.assignRole(userId, roleId);
 
-        assertTrue(testUser.getRoles().contains(testRole));
+        verify(userRepository).save(argThat(user ->
+                user.getRoles().contains(testRole)
+        ));
+    }
+
+    @Test
+    void testRemoveRole() {
+        // Assign role first
+        testUser.assignRole(testRole);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
+
+        userService.removeRole(userId, roleId);
+
+        assertFalse(testUser.getRoles().contains(testRole));
         verify(userRepository).save(testUser);
     }
 
@@ -66,12 +86,13 @@ class UserServiceTest {
     void testGetUser_Success() {
         User result = userService.getUser(userId);
 
-        assertEquals(testUser, result);
+        assertEquals(userId, result.getId());
+        assertEquals("John Doe", result.getName());
+        assertEquals("john@example.com", result.getEmail());
     }
 
     @Test
     void testGetUser_NotFound() {
-        // Override mock to simulate user not found
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class, () -> userService.getUser(userId));
@@ -80,7 +101,6 @@ class UserServiceTest {
 
     @Test
     void testAssignRole_UserNotFound() {
-        // Override mock to simulate user not found
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class, () -> userService.assignRole(userId, roleId));
@@ -89,10 +109,25 @@ class UserServiceTest {
 
     @Test
     void testAssignRole_RoleNotFound() {
-        // Override mock to simulate role not found
         when(roleRepository.findById(roleId)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class, () -> userService.assignRole(userId, roleId));
+        assertEquals("Role not found", ex.getMessage());
+    }
+
+    @Test
+    void testRemoveRole_UserNotFound() {
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> userService.removeRole(userId, roleId));
+        assertEquals("User not found", ex.getMessage());
+    }
+
+    @Test
+    void testRemoveRole_RoleNotFound() {
+        when(roleRepository.findById(roleId)).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> userService.removeRole(userId, roleId));
         assertEquals("Role not found", ex.getMessage());
     }
 }

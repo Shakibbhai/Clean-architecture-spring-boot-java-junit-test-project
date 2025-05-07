@@ -29,6 +29,11 @@ public class UserController {
         userService.assignRole(userId, roleId);
         return ResponseEntity.ok("Role assigned");
     }
+    @DeleteMapping("/{userId}/remove-role/{roleId}")
+    public ResponseEntity<String> removeRole(@PathVariable UUID userId, @PathVariable UUID roleId) {
+        userService.removeRole(userId, roleId);
+        return ResponseEntity.ok("Role removed");
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUser(@PathVariable UUID id) {
