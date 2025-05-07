@@ -1,7 +1,7 @@
 
-# 👥 User Management & Role Assignment System
+# 🛡️ User Management System (Clean Architecture)
 
-A Spring Boot application implementing a **User Management System** following Robert C. Martin's **Clean Architecture** principles. 
+This project is a simple **User Management and Role Assignment System** built with **Spring Boot** and adheres to **Robert C. Martin's Clean Architecture** principles. It demonstrates a layered approach to designing maintainable and testable enterprise applications. 
 
 It provides functionality to:
 
@@ -103,12 +103,12 @@ src/
 │ │ └── RoleController.java
 | |
 │ └── persistence/ # Database layer (Adapters)
-│ ├── UserJpaEntity.java
-│ ├── RoleJpaEntity.java
-│ ├── UserJpaRepository.java
-│ ├── RoleJpaRepository.java
-│ ├── UserRepositoryImpl.java
-│ └── RoleRepositoryImpl.java
+│     ├── UserJpaEntity.java
+│     ├── RoleJpaEntity.java
+│     ├── UserJpaRepository.java
+│     ├── RoleJpaRepository.java
+│     ├── UserRepositoryImpl.java
+│     └── RoleRepositoryImpl.java
 │
 ├── config/
 │ └── BeanConfig.java # Bean wiring for services
